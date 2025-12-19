@@ -1,0 +1,27 @@
+# backend/Dockerfile
+FROM php:8.4-fpm
+
+# Instalar dependências do sistema operacional
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip
+
+# Instala as extensões do PHP
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www
+
+# Cria um usuário de sistema para rodar os comandos do Composer e Artisan
+RUN useradd -G www-data,root -u 1000 -d /home/dev -m dev
+RUN mkdir -p /home/dev/.composer && \
+    chown -R dev:dev /home/dev
+
+# Define o usuário que será usado a partir de agora
+USER dev

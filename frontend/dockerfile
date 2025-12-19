@@ -1,0 +1,19 @@
+# frontend/Dockerfile
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Copia os arquivos de dependências primeiro
+COPY package*.json ./
+
+# Instala as dependências
+RUN npm install
+
+# Copia o resto do projeto
+COPY . .
+
+# Expõe a porta do Vite
+EXPOSE 5173
+
+# Comando para rodar o servidor de dev
+CMD ["npm", "run", "dev", "--", "--host"]
