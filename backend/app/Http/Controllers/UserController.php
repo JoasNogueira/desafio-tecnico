@@ -13,10 +13,10 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Carrega o usuário com o perfil
-        $query = User::with('perfil');
+        $query = User::with('profile');
 
         // Filtro por Nome (busca parcial)
         $query->when($request->name, function ($q) use ($request) {
