@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'cpf',
+        'profile_id',
     ];
 
     /**
@@ -44,5 +46,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Relação: Usuário pertence a UM Perfil
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class);
+    }
+
+    // Relação: Usuário tem MUITOS Endereços
+    public function addresses()
+    {
+        return $this->belongsToMany(Address::class, 'address_user');
     }
 }
