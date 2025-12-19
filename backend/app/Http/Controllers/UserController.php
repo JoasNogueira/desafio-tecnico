@@ -45,6 +45,10 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->user()->cannot('create', User::class)) {
+            return response()->json(['error' => 'Ação não autorizada.'], 403);
+        }
+
         try {
             // Validação dos Dados
             $validated = $request->validate([
@@ -125,6 +129,10 @@ class UserController extends Controller
         // findOrFail retorna erro 404 se não achar o ID
         $user = User::with(['profile', 'addresses'])->findOrFail($id);
 
+        if ($request->user()->cannot('update', $user)) {
+            return response()->json(['error' => 'Ação não autorizada.'], 403);
+        }
+
         try {
             // Validação dos Dados
             $validated = $request->validate([
@@ -192,6 +200,11 @@ class UserController extends Controller
     {
         // Retorna erro 404 se não achar o ID
         $user = User::findOrFail($id);
+
+        if (request()->user()->cannot('delete', $user)) {
+            return response()->json(['error' => 'Ação não autorizada.'], 403);
+        }
+
         $user->delete();
 
         return response()->json(['message' => 'Usuário deletado com sucesso!'], 200);
