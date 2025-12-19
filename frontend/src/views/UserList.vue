@@ -162,7 +162,7 @@ const limparFiltros = () => {
     data_inicio: '',
     data_fim: ''
   };
-  buscarUsuarios(); // Recarrega a lista completa
+  buscarUsuarios(); 
 };
 
 const excluir = async (id: number) => {
