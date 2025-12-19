@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@teste.com',
             'password' => bcrypt('123456'),
             'cpf' => '999.999.999-99',
-            'profile_id' => $adminPerfil->1,
+            'profile_id' => $adminPerfil->id,
         ]);
 
         User::create([

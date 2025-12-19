@@ -28,7 +28,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->perfil_id === 1 || $user->perfil_id === 2;
+        return $user->profile_id === 1 || $user->profile_id === 2;
     }
 
     /**
@@ -36,7 +36,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->perfil_id === 1 || $user->perfil_id === 2;
+        return $user->profile_id === 1 || $user->profile_id === 2;
     }
 
     /**
@@ -44,6 +44,6 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->perfil_id === 1;
+        return $user->profile_id === 1;
     }
 }
