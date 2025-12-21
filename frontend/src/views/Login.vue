@@ -16,9 +16,9 @@
             class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
-        <button type="submit" 
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200">
-          Entrar
+        <button type="submit" :disabled="loading"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200 cursor-pointer">
+          {{ loading ? 'Carregando...' : 'Entrar' }}
         </button>
       </form>
 
@@ -38,14 +38,17 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 const router = useRouter();
+const loading = ref(false);
 
 const handleLogin = async () => {
+  loading.value = true;
   try {
     const response = await api.post('/login', { email: email.value, password: password.value });
     localStorage.setItem('token', response.data.access_token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     router.push('/');
   } catch (err) {
+    loading.value = false;
     error.value = 'Login falhou. Verifique suas credenciais.';
   }
 };
