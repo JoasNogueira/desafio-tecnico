@@ -151,7 +151,7 @@ const filtrarNome = (event: Event) => {
   const valorSemNumeros = input.value.replace(/\d/g, '');
   
   // Atualiza o valor no estado e no input visualmente
-  form.value.name = valorSemNumeros;
+  filters.value.name = valorSemNumeros;
   input.value = valorSemNumeros;
 };
 
