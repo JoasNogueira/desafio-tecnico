@@ -3,10 +3,10 @@
     <div class="flex flex-col md:flex-row justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-800">Pesquisar Usuários</h1>
       <div class="flex gap-3 mt-4 md:mt-0">
-        <button @click="router.push('/novo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition">
+        <button @click="router.push('/novo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition cursor-pointer">
           + Novo Cadastro
         </button>
-        <button @click="fazerLogout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow transition">
+        <button @click="fazerLogout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow transition cursor-pointer">
           Sair
         </button>
       </div>
@@ -16,12 +16,12 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-          <input v-model="filters.name" type="text" placeholder="Digite o nome"
+          <input v-model.trim="filters.name" type="text" placeholder="Digite o nome" @input="filtrarNome"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-          <input v-model="filters.cpf" type="text" placeholder="000.000.000-00"
+          <input v-model="filters.cpf" type="text" placeholder="000.000.000-00" v-maska="'###.###.###-##'"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
       </div>
@@ -144,6 +144,16 @@ const filters = ref({
 });
 const showDeleteModal = ref(false);
 const userIdToDelete = ref<number | null>(null);
+
+const filtrarNome = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Expressão Regular: Substitui qualquer dígito (0-9) por vazio
+  const valorSemNumeros = input.value.replace(/\d/g, '');
+  
+  // Atualiza o valor no estado e no input visualmente
+  form.value.name = valorSemNumeros;
+  input.value = valorSemNumeros;
+};
 
 const fazerLogout = async () => {
   try {
