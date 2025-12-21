@@ -6,7 +6,7 @@
         {{ isEditing ? 'Editar Usuário' : 'Cadastro de Usuário' }}
       </h1>
       <button type="button" 
-        class="mt-4 md:mt-0 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition"
+        class="mt-4 md:mt-0 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition cursor-pointer"
         @click="router.push('/')">
         Voltar
       </button>
@@ -92,19 +92,19 @@
           <div class="md:col-span-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
             <input v-model="novoEndereco.city" type="text" placeholder="Cidade" 
-              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50" readonly>
+              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
             <input v-model="novoEndereco.state" type="text" placeholder="UF" maxlength="2"
-              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase bg-gray-50" readonly>
+              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase">
           </div>
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">País *</label>
             <input v-model="novoEndereco.country" type="text" placeholder="País" 
-              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50" readonly>
+              class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
           <div class="md:col-span-12 mt-2">
@@ -137,7 +137,7 @@
               <td class="px-4 py-3 whitespace-nowrap">{{ end.city }}/{{ end.state }}</td>
               <td class="px-4 py-3 whitespace-nowrap text-center">
                 <button type="button" @click="removerEndereco(index)" 
-                  class="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition">
+                  class="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 bg-red-50 hover:bg-red-100 px-2 py-1 rounded transition cursor-pointer">
                   Excluir
                 </button>
               </td>
@@ -148,12 +148,24 @@
 
       <div class="mt-8">
         <button type="submit" 
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition duration-200 text-lg">
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition duration-200 text-lg cursor-pointer">
           Salvar Dados
         </button>
       </div>
 
     </form>
+
+    <ConfirmationModal 
+      :show="modalConfig.show"
+      :title="modalConfig.title"
+      :message="modalConfig.message"
+      :show-cancel="modalConfig.showCancel"
+      :confirm-text="modalConfig.confirmText"
+      :confirm-color="modalConfig.confirmColor"
+      @close="modalConfig.show = false"
+      @confirm="fecharModalDeAviso"
+    />
+
   </div>
 </template>
 
@@ -162,6 +174,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../services/api';
 import { buscarCEP } from '../services/cep';
+import ConfirmationModal from '../components/ConfirmationModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -192,8 +205,36 @@ const novoEndereco = ref({
 const perfis = ref<{ id: number; name: string }[]>([]);
 const isEditing = computed(() => !!route.params.id);
 
+const modalConfig = ref({
+  show: false,
+  title: '',
+  message: '',
+  showCancel: false,      // Avisos simples não tem botão cancelar
+  confirmText: 'OK',      // Botão diz apenas OK
+  confirmColor: 'bg-blue-600 hover:bg-blue-700' // Cor azul
+});
+
+
+const abrirModalAviso = (titulo: string, msg: string, erro = false) => {
+  modalConfig.value = {
+    show: true,
+    title: titulo,
+    message: msg,
+    showCancel: false, 
+    confirmText: 'Entendi',
+    confirmColor: erro ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+  };
+};
+
+const fecharModalDeAviso = () => {
+  modalConfig.value.show = false;
+  // Se for uma mensagem de sucesso, redireciona ao fechar
+  if (modalConfig.value.title === 'Sucesso') {
+    router.push('/');
+  }
+};
+
 watch(() => novoEndereco.value.zip, async (novoCep) => {
-  // Remove formatação para contar dígitos
   const cepLimpo = novoCep?.replace(/\D/g, '') || '';
   
   if (cepLimpo.length === 8) {
@@ -202,17 +243,14 @@ watch(() => novoEndereco.value.zip, async (novoCep) => {
     const enderecoEncontrado = await buscarCEP(cepLimpo);
     
     if (enderecoEncontrado) {
-      // Preenche os campos automaticamente
       novoEndereco.value.street = enderecoEncontrado.street;
       novoEndereco.value.neighborhood = enderecoEncontrado.neighborhood;
       novoEndereco.value.city = enderecoEncontrado.city;
       novoEndereco.value.state = enderecoEncontrado.state;
       novoEndereco.value.country = enderecoEncontrado.country;
-      
-      // Foca automaticamente no campo "Número" para o usuário continuar digitando
       setTimeout(() => numeroInput.value?.focus(), 100);
     } else {
-      alert('CEP não encontrado.');
+      abrirModalAviso('CEP Não Encontrado', 'O CEP informado não retornou nenhum endereço. Verifique e tente novamente.', true);
     }
     
     loadingCep.value = false;
@@ -247,20 +285,22 @@ const removerEndereco = (index: number) => {
 const salvar = async () => {
   try {
     if (form.value.addresses.length === 0) {
-      alert('Adicione pelo menos um endereço!');
+      abrirModalAviso('Atenção', 'Adicione pelo menos um endereço!', true);
       return;
     }
+
+    // Modal de aviso de sucesso ao Editar ou Cadastrar novo usuário
     if (isEditing.value) {
       await api.put(`/users/${route.params.id}`, form.value);
-      alert('Usuário atualizado!');
+      abrirModalAviso('Sucesso', 'Usuário atualizado com sucesso!');
     } else {
       await api.post('/users', form.value);
-      alert('Usuário cadastrado!');
+      abrirModalAviso('Sucesso', 'Usuário cadastrado com sucesso!');
     }
-    router.push('/');
+    
   } catch (error: any) {
     const msg = error.response?.data?.message || 'Erro ao salvar';
-    alert(msg);
+    abrirModalAviso('Erro', msg, true);
   }
 };
 
@@ -274,7 +314,6 @@ const carregarDadosEdicao = async () => {
     form.value.cpf = user.cpf;
     form.value.profile_id = user.profile_id;
     
-    // Mapeamento corrigido para garantir que o Cep apareça
     form.value.addresses = user.addresses.map((e: any) => ({
       street: e.street,
       number: e.number,
