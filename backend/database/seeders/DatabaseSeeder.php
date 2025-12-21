@@ -26,21 +26,5 @@ class DatabaseSeeder extends Seeder
             'cpf' => '999.999.999-99',
             'profile_id' => $adminPerfil->id,
         ]);
-
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@teste.com',
-            'password' => bcrypt('123456'),
-            'cpf' => '888.888.888-88',
-            'profile_id' => $usuarioPerfil->id,
-        ]);
-
-        User::create([
-            'name' => 'Guest User',
-            'email' => 'guest@teste.com',
-            'password' => bcrypt('123456'),
-            'cpf' => '777.777.777-77',
-            'profile_id' => $convidadoPerfil->id,
-        ]);
     }
 }
