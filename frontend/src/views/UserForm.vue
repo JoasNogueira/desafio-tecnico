@@ -19,13 +19,13 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-          <input v-model="form.name" type="text" required placeholder="Nome completo"
+          <input v-model.trim="form.name" type="text" required placeholder="Nome completo" @input="filtrarNome($event)"  
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
-          <input v-model="form.cpf" type="text" required placeholder="000.000.000-00" v-mask="'###.###.###-##'" maxlength="14"
+          <input v-model="form.cpf" type="text" required placeholder="000.000.000-00" v-maska="'###.###.###-##'" maxlength="14"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
@@ -60,38 +60,38 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">
               CEP * <span v-if="loadingCep" class="text-xs text-blue-500 ml-2">(Buscando...)</span>
             </label>
-            <input v-model="novoEndereco.zip" type="text" placeholder="00000-000" v-mask="'#####-###'" maxlength="9"
+            <input v-model="novoEndereco.zip" type="text" placeholder="00000-000" v-maska="'#####-###'" maxlength="9"
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               :class="{'bg-gray-100': loadingCep}">
           </div>
 
           <div class="md:col-span-7">
             <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro *</label>
-            <input v-model="novoEndereco.street" type="text" placeholder="Rua, Av..." 
+            <input v-model.trim="novoEndereco.street" type="text" placeholder="Rua, Av..." 
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Número *</label>
-            <input v-model="novoEndereco.number" type="text" placeholder="Nº" ref="numeroInput"
+            <input v-model="novoEndereco.number" type="number" placeholder="Nº" ref="numeroInput"
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
           <div class="md:col-span-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
-            <input v-model="novoEndereco.complement" type="text" placeholder="Apto, sala..."
+            <input v-model.trim="novoEndereco.complement" type="text" placeholder="Apto, sala..."
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
           <div class="md:col-span-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Bairro *</label>
-            <input v-model="novoEndereco.neighborhood" type="text" placeholder="Bairro" 
+            <input v-model.trim="novoEndereco.neighborhood" type="text" placeholder="Bairro" 
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           
           <div class="md:col-span-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
-            <input v-model="novoEndereco.city" type="text" placeholder="Cidade" 
+            <input v-model.trim="novoEndereco.city" type="text" placeholder="Cidade" 
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
@@ -103,7 +103,7 @@
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">País *</label>
-            <input v-model="novoEndereco.country" type="text" placeholder="País" 
+            <input v-model.trim="novoEndereco.country" type="text" placeholder="País" 
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
@@ -204,6 +204,16 @@ const novoEndereco = ref({
 
 const perfis = ref<{ id: number; name: string }[]>([]);
 const isEditing = computed(() => !!route.params.id);
+
+const filtrarNome = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Expressão Regular: Substitui qualquer dígito (0-9) por vazio
+  const valorSemNumeros = input.value.replace(/\d/g, '');
+  
+  // Atualiza o valor no estado e no input visualmente
+  form.value.name = valorSemNumeros;
+  input.value = valorSemNumeros;
+};
 
 const modalConfig = ref({
   show: false,
