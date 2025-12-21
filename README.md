@@ -61,6 +61,13 @@ Aguarde o término do script. Ao final, os serviços estarão disponíveis em:
 
 ---
 
+# Testes Automatizados
+O projeto utiliza Vitest para garantir a integridade das regras de negócio e o funcionamento dos componentes.
+
+```bash
+docker compose run --rm web npm run test
+```
+
 ## Credenciais Padrão (Admin)
 
 Admin:
