@@ -3,7 +3,9 @@
     <div class="flex flex-col md:flex-row justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-800">Pesquisar Usuários</h1>
       <div class="flex gap-3 mt-4 md:mt-0">
-        <button @click="router.push('/novo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition cursor-pointer">
+        <button 
+        v-if="currentUser && currentUser.profile_id === 1" 
+        @click="router.push('/novo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition cursor-pointer">
           + Novo Cadastro
         </button>
         <button @click="fazerLogout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow transition cursor-pointer">
@@ -82,14 +84,14 @@
                   Ver
                 </button>
                 <button
-                  v-if="currentUser.profile?.id === 1 || currentUser.profile?.id === 2"
+                  v-if="currentUser.profile_id === 1 || (currentUser.profile_id === 2 && currentUser.id === user.id)"
                   @click="router.push(`/editar/${user.id}`)"
                   class="bg-yellow-500 text-white py-1 px-3 rounded text-xs hover:bg-yellow-600 cursor-pointer"
                 >
                   Editar
                 </button>
                 <button
-                  v-if="currentUser.profile?.id === 1"
+                  v-if="currentUser.profile_id === 1 && user.profile_id !== 1"
                   @click="abrirModalExclusao(user.id)"
                   class="bg-red-500 text-white py-1 px-3 rounded text-xs hover:bg-red-600 cursor-pointer"
                   data-testid="btn-delete"
