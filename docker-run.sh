@@ -56,9 +56,6 @@ docker compose run --rm web npm install
 echo "[INFO] Reiniciando serviço web..."
 docker compose restart web
 
-# 7. Ajuste de Permissões (Linux)
-echo "[INFO] Ajustando permissões de proprietário dos arquivos..."
-sudo chown -R $USER:$USER .
 
 echo "-------------------------------------------------------"
 echo "Ambiente configurado com sucesso."
