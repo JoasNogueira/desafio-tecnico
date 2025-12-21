@@ -55,6 +55,7 @@ class UserController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'cpf' => 'required|string|unique:users,cpf',
+                'password' => 'required|string|min:6',
                 'profile_id' => 'required|exists:profiles,id',
                 'addresses' => 'required|array',
                 'addresses.*.zip' => 'required|string',
@@ -74,7 +75,7 @@ class UserController extends Controller
                 'email' => $validated['email'],
                 'cpf' => $validated['cpf'],
                 'profile_id' => $validated['profile_id'],
-                'password' => bcrypt('senha123'),
+                'password' => bcrypt($validated['password']),
             ]);
 
             // Array para coletar IDs dos endereços
@@ -137,6 +138,7 @@ class UserController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'cpf' => 'required|string|unique:users,cpf,' . $user->id,
+                'password' => 'nullable|string|min:6',
                 'profile_id' => 'required|exists:profiles,id',
                 'addresses' => 'required|array',
                 'addresses.*.zip' => 'required|string',
@@ -157,6 +159,10 @@ class UserController extends Controller
                 'cpf' => $validated['cpf'],
                 'profile_id' => $validated['profile_id'],
             ]);
+
+            if (!empty($validated['password'])) {
+                $userData['password'] = bcrypt($validated['password']);
+            }
 
             // Criamos um array para guardar os IDs que devem ficar vinculados
             $addressIds = [];
