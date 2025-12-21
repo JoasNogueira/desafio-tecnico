@@ -28,7 +28,7 @@ describe('UserList.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Simula usuário logado com permissão total (id 1)
-    localStorage.setItem('user', JSON.stringify({ id: 1, profile: { id: 1 } }));
+    localStorage.setItem('user', JSON.stringify({ id: 1, profile_id: 1, profile: { id: 1 } }));
   });
 
   it('deve buscar e listar usuários ao montar', async () => {
@@ -66,7 +66,8 @@ describe('UserList.vue', () => {
   });
 
   it('deve abrir modal e excluir usuário ao confirmar', async () => {
-    (api.get as any).mockResolvedValue({ data: [{ id: 10, name: 'Para Deletar' }] });
+    // Usuário a ser deletado deve ter profile_id diferente de 1 para aparecer o botão de excluir
+    (api.get as any).mockResolvedValue({ data: [{ id: 10, name: 'Para Deletar', profile_id: 2 }] });
     (api.delete as any).mockResolvedValue({});
 
     const wrapper = mount(UserList, { global: { directives: { maska: {} } } });
@@ -74,7 +75,7 @@ describe('UserList.vue', () => {
 
     // Clica no botão excluir
     const btnDelete = wrapper.find('[data-testid="btn-delete"]');
-    await btnDelete?.trigger('click');
+    await btnDelete.trigger('click');
 
     // Verifica se o estado do modal mudou para true
     expect((wrapper.vm as any).showDeleteModal).toBe(true);
