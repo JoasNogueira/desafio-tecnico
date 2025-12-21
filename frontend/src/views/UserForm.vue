@@ -19,25 +19,25 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-          <input v-model.trim="form.name" type="text" required placeholder="Nome completo" @input="filtrarNome($event)"  
+          <input v-model.trim="form.name" type="text" required placeholder="Nome completo" @input="filtrarNome($event)" data-testid="input-nome"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
-          <input v-model="form.cpf" type="text" required placeholder="000.000.000-00" v-maska="'###.###.###-##'" maxlength="14"
+          <input v-model="form.cpf" type="text" required placeholder="000.000.000-00" v-maska="'###.###.###-##'" maxlength="14" data-testid="input-cpf"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input v-model="form.email" type="email" required placeholder="email@exemplo.com"
+          <input v-model="form.email" type="email" required placeholder="email@exemplo.com" data-testid="input-email"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Perfil *</label>
-          <select v-model="form.profile_id" required
+          <select v-model="form.profile_id" required data-testid="select-profile"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
             <option value="" disabled>Selecione</option>
             <option v-for="perfil in perfis" :key="perfil.id" :value="perfil.id">
@@ -60,20 +60,20 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">
               CEP * <span v-if="loadingCep" class="text-xs text-blue-500 ml-2">(Buscando...)</span>
             </label>
-            <input v-model="novoEndereco.zip" type="text" placeholder="00000-000" v-maska="'#####-###'" maxlength="9"
+            <input v-model="novoEndereco.zip" type="text" placeholder="00000-000" v-maska="'#####-###'" maxlength="9" data-testid="input-cep"
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               :class="{'bg-gray-100': loadingCep}">
           </div>
 
           <div class="md:col-span-7">
             <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro *</label>
-            <input v-model.trim="novoEndereco.street" type="text" placeholder="Rua, Av..." 
+            <input v-model.trim="novoEndereco.street" type="text" placeholder="Rua, Av..." data-testid="input-logradouro"
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Número *</label>
-            <input v-model="novoEndereco.number" type="number" placeholder="Nº" ref="numeroInput"
+            <input v-model="novoEndereco.number" type="text" placeholder="Nº" ref="numeroInput" data-testid="input-numero" @input="filtrarNumero($event)"
               class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
@@ -108,7 +108,7 @@
           </div>
 
           <div class="md:col-span-12 mt-2">
-            <button type="button" @click="adicionarEndereco" 
+            <button type="button" @click="adicionarEndereco" data-testid="btn-add-address"
               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow transition text-sm">
               + Adicionar Endereço
             </button>
@@ -213,6 +213,16 @@ const filtrarNome = (event: Event) => {
   // Atualiza o valor no estado e no input visualmente
   form.value.name = valorSemNumeros;
   input.value = valorSemNumeros;
+};
+
+const filtrarNumero = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Substitui tudo que não for dígito por vazio
+  const valorApenasNumeros = input.value.replace(/\D/g, '');
+  
+  // Atualiza o valor no estado e no input visualmente
+  novoEndereco.value.number = valorApenasNumeros;
+  input.value = valorApenasNumeros;
 };
 
 const modalConfig = ref({
@@ -325,6 +335,7 @@ const carregarDadosEdicao = async () => {
     form.value.profile_id = user.profile_id;
     
     form.value.addresses = user.addresses.map((e: any) => ({
+      id: e.id,
       street: e.street,
       number: e.number,
       complement: e.complement,

@@ -14,13 +14,15 @@
         <button 
           v-if="showCancel"
           @click="$emit('close')" 
-          class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition font-medium cursor-pointer">
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition font-medium cursor-pointer"
+          data-testid="btn-cancel">
           Cancelar
         </button>
         
         <button 
           @click="$emit('confirm')" 
-          :class="['px-4 py-2 text-white rounded transition font-bold shadow-md cursor-pointer', confirmColor]">
+          :class="['px-4 py-2 text-white rounded transition font-bold shadow-md cursor-pointer', confirmColor]"
+          data-testid="btn-confirm">
           {{ confirmText }}
         </button>
       </div>

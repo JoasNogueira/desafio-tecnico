@@ -6,12 +6,14 @@
           v-if="currentUser && (currentUser.profile_id === 1 || currentUser.profile?.id === 2)"
           @click="router.push(`/editar/${user.id}`)"
           class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow transition cursor-pointer"
+          data-testid="btn-edit"
         >
           Editar
         </button>
         <button
           @click="router.push('/')"
           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition cursor-pointer"
+          data-testid="btn-back"
         >
           Voltar
         </button>

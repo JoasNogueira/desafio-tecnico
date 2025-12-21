@@ -16,12 +16,12 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-          <input v-model.trim="filters.name" type="text" placeholder="Digite o nome" @input="filtrarNome"
+          <input v-model.trim="filters.name" type="text" placeholder="Digite o nome" @input="filtrarNome" data-testid="filter-name"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-          <input v-model="filters.cpf" type="text" placeholder="000.000.000-00" v-maska="'###.###.###-##'"
+          <input v-model="filters.cpf" type="text" placeholder="000.000.000-00" v-maska="'###.###.###-##'" data-testid="filter-cpf"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
       </div>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-3 mt-4">
-        <button @click="buscarUsuarios" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition w-full md:w-auto cursor-pointer">
+        <button @click="buscarUsuarios" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition w-full md:w-auto cursor-pointer" data-testid="btn-filter">
           Filtrar Resultados
         </button>
         
@@ -92,6 +92,7 @@
                   v-if="currentUser.profile?.id === 1"
                   @click="abrirModalExclusao(user.id)"
                   class="bg-red-500 text-white py-1 px-3 rounded text-xs hover:bg-red-600 cursor-pointer"
+                  data-testid="btn-delete"
                 >
                   Excluir
                 </button>
