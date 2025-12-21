@@ -37,56 +37,61 @@ Certifique-se de ter instalado em sua máquina:
 
 ---
 
-## Passo a Passo para Instalação (Do Zero)
+### Instalação Automática (Recomendado)
 
-Siga estes passos caso tenha acabado de clonar o projeto ou resetado os containers.
+Para facilitar a avaliação, o projeto inclui um script de automação que realiza:
+
+* Build dos containers
+* Instalação das dependências (Composer e NPM)
+* Configuração do ambiente
+* Execução das migrations e seeders
+* Ajuste de permissões (Linux)
+
+Na raiz do projeto, execute:
+
+```bash
+chmod +x docker-run.sh
+./docker-run.sh
+```
+
+Aguarde o término do script. Ao final, os serviços estarão disponíveis em:
+
+* Frontend: [http://localhost:5173](http://localhost:5173)
+* API Backend: [http://localhost:8000](http://localhost:8000)
 
 ---
 
-### 1. Configuração Inicial
+## Credenciais Padrão (Admin)
 
-Na pasta raiz do projeto, execute:
+Admin:
+* **E-mail:** [admin@teste.com]
+* **Senha:** 123456
+
+> ⚠️ **Importante:** Altere as credenciais em ambiente de produção.
+
+---
+
+### Instalação Manual (Alternativa)
+
+#### 1. Subir os containers
 
 ```bash
-# 1. Copie o arquivo de ambiente do Laravel
-cp backend/.env.example backend/.env
-
-# 2. Suba os containers (pode demorar na primeira vez)
 docker compose up -d --build
 ```
 
----
-
-### 2. Configurando o Backend (API)
-
-Instalação das dependências do PHP e preparação do banco de dados:
+#### 2. Configurar o Backend
 
 ```bash
-# 1. Instalar dependências do Composer
+cp backend/.env.example backend/.env
 docker compose run --rm api composer install
-
-# 2. Gerar a chave da aplicação
 docker compose run --rm api php artisan key:generate
-
-# 3. Rodar Migrations e Seeders (Cria tabelas e Usuário Admin)
 docker compose run --rm api php artisan migrate:fresh --seed
-
-# 4. (Apenas Linux) Corrigir permissões de arquivos
-sudo chown -R $USER:$USER .
 ```
 
----
-
-### 3. Configurando o Frontend (Vue)
-
-Instalação das dependências do Node.js:
+#### 3. Configurar o Frontend
 
 ```bash
-# 1. Instalar dependências dentro do container
 docker compose run --rm web npm install
-
-# 2. Reiniciar o container web para garantir o carregamento
-docker compose restart web
 ```
 
 ---
@@ -99,24 +104,6 @@ Após concluir os passos acima, o sistema estará disponível em:
 | -------------------- | ---------------------------------------------- |
 | Frontend (Aplicação) | [http://localhost:5173](http://localhost:5173) |
 | Backend (API)        | [http://localhost:8000](http://localhost:8000) |
-
----
-
-## Credenciais Padrão (Admin)
-
-Admin:
-* **E-mail:** [admin@teste.com]
-* **Senha:** 123456
-
-Usuario:
-* **E-mail:** [test@teste.com]
-* **Senha:** 123456
-
-Convidado:
-* **E-mail:** [guest@teste.com]
-* **Senha:** 123456
-
-> ⚠️ **Importante:** Altere as credenciais em ambiente de produção.
 
 ---
 
