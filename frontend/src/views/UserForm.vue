@@ -35,7 +35,16 @@
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         </div>
 
-        <div class="md:col-span-2">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Senha {{ isEditing ? '(Opcional)' : '*' }}
+          </label>
+          <input v-model="form.password" type="password" :required="!isEditing" placeholder="******" minlength="6"
+            class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+          <p v-if="isEditing" class="text-xs text-gray-500 mt-1">Deixe em branco para manter a atual.</p>
+        </div>
+
+        <div v-if="currentUser.profile_id === 1 && Number(form.profile_id) !== 1" class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Perfil *</label>
           <select v-model="form.profile_id" required data-testid="select-profile"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
@@ -179,6 +188,8 @@ import ConfirmationModal from '../components/ConfirmationModal.vue';
 const route = useRoute();
 const router = useRouter();
 
+const currentUser = ref<any>({});
+
 // Refs
 const numeroInput = ref<HTMLInputElement | null>(null); // Para focar no número após buscar
 const loadingCep = ref(false); // Estado de carregamento
@@ -187,6 +198,7 @@ const form = ref({
   name: '',
   cpf: '',
   email: '',
+  password: '',
   profile_id: '',
   addresses: [] as Array<any>
 });
@@ -351,6 +363,9 @@ const carregarDadosEdicao = async () => {
 };
 
 onMounted(() => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) currentUser.value = JSON.parse(userStr);
+
   carregarPerfis();
   carregarDadosEdicao();
 });
