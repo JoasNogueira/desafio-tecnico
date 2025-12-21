@@ -40,6 +40,7 @@ class UserController extends Controller
         return response()->json($query->orderBy('id', 'desc')->get());
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
@@ -50,12 +51,10 @@ class UserController extends Controller
         }
 
         try {
-            // Validação dos Dados
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'cpf' => 'required|string|unique:users,cpf',
-
                 'profile_id' => 'required|exists:profiles,id',
                 'addresses' => 'required|array',
                 'addresses.*.zip' => 'required|string',
@@ -75,13 +74,13 @@ class UserController extends Controller
                 'email' => $validated['email'],
                 'cpf' => $validated['cpf'],
                 'profile_id' => $validated['profile_id'],
-                'password' => bcrypt('senha123'), // Senha padrão para o teste
+                'password' => bcrypt('senha123'),
             ]);
 
-            // Processa os Endereços
+            // Array para coletar IDs dos endereços
+            $addressIds = [];
+
             foreach ($validated['addresses'] as $end) {
-                // firstOrCreate: Tenta achar o endereço pelo dados preenchidos.
-                // Se achar, usa o ID existente. Se não, cria um novo.
                 $endereco = Address::firstOrCreate([
                     'zip' => $end['zip'],
                     'street' => $end['street'],
@@ -92,10 +91,12 @@ class UserController extends Controller
                     'state' => $end['state'],
                     'country' => $end['country'] ?? 'Brasil',
                 ]);
-
-                // Vincula o endereço ao usuário na tabela pivô (address_user)
-                $user->addresses()->attach($endereco->id);
+                
+                $addressIds[] = $endereco->id;
             }
+
+            // Sync é mais seguro até no create para evitar duplicidades se rodar 2x
+            $user->addresses()->sync($addressIds);
 
             DB::commit();
 
@@ -105,7 +106,6 @@ class UserController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // Se der erro, desfaz tudo
             DB::rollBack();
             return response()->json(['error' => 'Erro ao criar usuário: ' . $e->getMessage()], 400);
         }
@@ -116,7 +116,6 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        // findOrFail retorna erro 404 se não achar o ID
         $user = User::with(['profile', 'addresses'])->findOrFail($id);
         return response()->json($user);
     }
@@ -126,7 +125,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // findOrFail retorna erro 404 se não achar o ID
+        \Log::info('Endereços recebidos:', $request->addresses);
         $user = User::with(['profile', 'addresses'])->findOrFail($id);
 
         if ($request->user()->cannot('update', $user)) {
@@ -134,7 +133,6 @@ class UserController extends Controller
         }
 
         try {
-            // Validação dos Dados
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
@@ -153,7 +151,6 @@ class UserController extends Controller
 
             DB::beginTransaction();
 
-            // Atualiza os dados do usuário
             $user->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -161,11 +158,14 @@ class UserController extends Controller
                 'profile_id' => $validated['profile_id'],
             ]);
 
-            // Processa os Endereços
+            // Criamos um array para guardar os IDs que devem ficar vinculados
+            $addressIds = [];
+
             foreach ($validated['addresses'] as $end) {
-                // firstOrCreate: Tenta achar o endereço pelo dados preenchidos.
-                // Se achar, usa o ID existente. Se não, cria um novo.
-                $endereco = Address::firstOrCreate([
+                // Busca ou cria o endereço baseado nos dados
+                $endereco = Address::updateOrCreate(
+                ['id' => $end['id'] ?? null], 
+                [
                     'zip' => $end['zip'],
                     'street' => $end['street'],
                     'number' => $end['number'] ?? null,
@@ -176,9 +176,15 @@ class UserController extends Controller
                     'country' => $end['country'] ?? 'Brasil',
                 ]);
 
-                // Vincula o endereço ao usuário na tabela pivô (address_user)
-                $user->addresses()->attach($endereco->id);
+                // Adiciona o ID na lista
+                $addressIds[] = $endereco->id;
             }
+
+            
+            // O sync remove tudo que não estiver no array $addressIds e adiciona os novos
+            $user->addresses()->sync($addressIds);
+
+            Address::doesntHave('users')->delete();
 
             DB::commit();
 
@@ -187,7 +193,6 @@ class UserController extends Controller
                 'user' => $user->load('addresses', 'profile')
             ], 200);
         } catch (\Exception $e) {
-            // Se der erro, desfaz tudo
             DB::rollBack();
             return response()->json(['error' => 'Erro ao atualizar usuário: ' . $e->getMessage()], 400);
         }
@@ -198,7 +203,6 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        // Retorna erro 404 se não achar o ID
         $user = User::findOrFail($id);
 
         if (request()->user()->cannot('delete', $user)) {
