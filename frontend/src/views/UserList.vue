@@ -28,21 +28,21 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Cadastrado em:</label>
-          <input v-model="filters.data_inicio" type="date"
+          <input v-model="filters.data_inicio" type="date" max="9999-12-31"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Até:</label>
-          <input v-model="filters.data_fim" type="date"
+          <input v-model="filters.data_fim" type="date" max="9999-12-31"
             class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500">
         </div>
       </div>
       <div class="flex flex-col md:flex-row gap-3 mt-4">
-        <button @click="buscarUsuarios" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition w-full md:w-auto">
+        <button @click="buscarUsuarios" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition w-full md:w-auto cursor-pointer">
           Filtrar Resultados
         </button>
         
-        <button @click="limparFiltros" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 rounded shadow-sm transition w-full md:w-auto">
+        <button @click="limparFiltros" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2 rounded shadow-sm transition w-full md:w-auto cursor-pointer">
           Limpar Filtros
         </button>
       </div>
@@ -77,21 +77,21 @@
               <div class="flex justify-center gap-2">
                 <button
                   @click="router.push(`/detalhes/${user.id}`)"
-                  class="bg-cyan-500 text-white py-1 px-3 rounded text-xs hover:bg-cyan-600"
+                  class="bg-cyan-500 text-white py-1 px-3 rounded text-xs hover:bg-cyan-600 cursor-pointer"
                 >
                   Ver
                 </button>
                 <button
                   v-if="currentUser.profile?.id === 1 || currentUser.profile?.id === 2"
                   @click="router.push(`/editar/${user.id}`)"
-                  class="bg-yellow-500 text-white py-1 px-3 rounded text-xs hover:bg-yellow-600"
+                  class="bg-yellow-500 text-white py-1 px-3 rounded text-xs hover:bg-yellow-600 cursor-pointer"
                 >
                   Editar
                 </button>
                 <button
                   v-if="currentUser.profile?.id === 1"
-                  @click="excluir(user.id)"
-                  class="bg-red-500 text-white py-1 px-3 rounded text-xs hover:bg-red-600"
+                  @click="abrirModalExclusao(user.id)"
+                  class="bg-red-500 text-white py-1 px-3 rounded text-xs hover:bg-red-600 cursor-pointer"
                 >
                   Excluir
                 </button>
@@ -104,6 +104,15 @@
         </tbody>
       </table>
     </div>
+
+    <ConfirmationModal 
+      :show="showDeleteModal"
+      title="Excluir Usuário"
+      message="Tem certeza que deseja excluir este usuário permanentemente? Esta ação não pode ser desfeita."
+      @close="showDeleteModal = false"
+      @confirm="confirmarExclusao"
+    />
+
   </div>
 </template>
 
@@ -111,6 +120,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal.vue';
 
 const router = useRouter();
 
@@ -132,6 +142,8 @@ const filters = ref({
   data_inicio: '',
   data_fim: ''
 });
+const showDeleteModal = ref(false);
+const userIdToDelete = ref<number | null>(null);
 
 const fazerLogout = async () => {
   try {
@@ -165,14 +177,28 @@ const limparFiltros = () => {
   buscarUsuarios(); 
 };
 
-const excluir = async (id: number) => {
-  if (confirm('Tem certeza?')) {
+
+const abrirModalExclusao = (id: number) => {
+  userIdToDelete.value = id;
+  showDeleteModal.value = true;
+};
+
+
+const confirmarExclusao = async () => {
+  if (userIdToDelete.value) {
     try {
-      await api.delete(`/users/${id}`);
-      alert('Usuário excluído!');
+      await api.delete(`/users/${userIdToDelete.value}`);
+      
+      // Fecha o modal
+      showDeleteModal.value = false;
+      userIdToDelete.value = null;
+      
+      // Atualiza a lista
       buscarUsuarios();
+      
     } catch (error) {
-      alert('Erro ao excluir.');
+      alert('Erro ao excluir usuário (Verifique permissões ou dependências).');
+      showDeleteModal.value = false;
     }
   }
 };
