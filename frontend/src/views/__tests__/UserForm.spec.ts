@@ -5,7 +5,7 @@ import api from '../../services/api';
 
 // Mocks Globais
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: {} }), // Params vazio = Modo Criação
+  useRoute: () => ({ params: {} }),
   useRouter: () => ({ push: vi.fn() }),
 }));
 
@@ -67,11 +67,6 @@ describe('UserForm.vue', () => {
     const wrapper = mount(UserForm, {
       global: { directives: { maska: {} } }
     });
-
-    // Preenche campos do novo endereço
-    // Como usamos v-model no novoEndereco, acessamos via input
-    // Encontrar inputs específicos é difícil sem classes/ids únicos, 
-    // mas vamos assumir a ordem ou usar placeholder
     
     await wrapper.find('[data-testid="input-cep"]').setValue('40000-000');
     await wrapper.find('[data-testid="input-logradouro"]').setValue('Rua Teste');

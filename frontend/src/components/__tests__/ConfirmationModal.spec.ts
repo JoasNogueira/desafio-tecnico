@@ -30,7 +30,6 @@ describe('ConfirmationModal', () => {
       props: { show: true }
     })
 
-    // Busca o botão que tem a classe bg-red-600 (ou a cor padrão que definimos)
     const button = wrapper.find('[data-testid="btn-confirm"]')
     
     await button?.trigger('click')

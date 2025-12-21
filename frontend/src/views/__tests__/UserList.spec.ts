@@ -46,7 +46,7 @@ describe('UserList.vue', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(api.get).toHaveBeenCalledWith('/users', expect.anything());
-    // Verifica se renderizou 2 linhas na tabela (+1 se contar o header, depende da estrutura)
+    // Verifica se renderizou 2 linhas na tabela (além do cabeçalho)
     // Vamos verificar se os nomes estão no texto
     expect(wrapper.text()).toContain('User A');
     expect(wrapper.text()).toContain('User B');
@@ -81,7 +81,7 @@ describe('UserList.vue', () => {
     expect((wrapper.vm as any).userIdToDelete).toBe(10);
 
     // Simula a confirmação do modal (emitindo evento 'confirm' do componente filho)
-    // Como mockamos o componente filho, precisamos emitir o evento manualmente no wrapper pai
+    // Como o componente filho esta mockado, precisamos emitir o evento manualmente no wrapper pai
     // chamando a função que o @confirm invoca
     await (wrapper.vm as any).confirmarExclusao();
 
