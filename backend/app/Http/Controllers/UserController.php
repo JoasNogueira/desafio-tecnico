@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Rules\Cpf;
 
 class UserController extends Controller
 {
@@ -54,7 +55,7 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
-                'cpf' => 'required|string|unique:users,cpf',
+                'cpf' => ['required', 'string', new Cpf, 'unique:users,cpf'],
                 'password' => 'required|string|min:6',
                 'profile_id' => 'required|exists:profiles,id',
                 'addresses' => 'required|array',
@@ -137,7 +138,7 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'cpf' => 'required|string|unique:users,cpf,' . $user->id,
+                'cpf' => ['required', 'string', new Cpf, 'unique:users,cpf,' . $user->id],
                 'password' => 'nullable|string|min:6',
                 'profile_id' => 'required|exists:profiles,id',
                 'addresses' => 'required|array',
