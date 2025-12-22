@@ -25,8 +25,18 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">CPF *</label>
-          <input v-model="form.cpf" type="text" required placeholder="000.000.000-00" v-maska="'###.###.###-##'" maxlength="14" data-testid="input-cpf"
-            class="w-full border-gray-300 border rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+          <input 
+            v-model="form.cpf" 
+            @blur="verificarCpf" 
+            type="text" 
+            data-testid="input-cpf"
+            required 
+            placeholder="000.000.000-00" 
+            v-maska="'###.###.###-##'" 
+            class="w-full border rounded-md p-2 focus:outline-none transition"
+            :class="erroCpf ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'"
+          >
+          <span v-if="erroCpf" class="text-xs text-red-500 font-bold">{{ erroCpf }}</span>
         </div>
 
         <div>
@@ -216,6 +226,7 @@ const novoEndereco = ref({
 
 const perfis = ref<{ id: number; name: string }[]>([]);
 const isEditing = computed(() => !!route.params.id);
+const erroCpf = ref('');
 
 const filtrarNome = (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -235,6 +246,31 @@ const filtrarNumero = (event: Event) => {
   // Atualiza o valor no estado e no input visualmente
   novoEndereco.value.number = valorApenasNumeros;
   input.value = valorApenasNumeros;
+};
+
+const validarCPF = (cpf: string) => {
+  cpf = cpf.replace(/[^\d]+/g, '');
+  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+  let soma = 0, resto;
+  for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (11 - i);
+  resto = (soma * 10) % 11;
+  if ((resto === 10) || (resto === 11)) resto = 0;
+  if (resto !== parseInt(cpf.substring(9, 10))) return false;
+  soma = 0;
+  for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (12 - i);
+  resto = (soma * 10) % 11;
+  if ((resto === 10) || (resto === 11)) resto = 0;
+  if (resto !== parseInt(cpf.substring(10, 11))) return false;
+  return true;
+};
+
+const verificarCpf = () => {
+  if (form.value.cpf && !validarCPF(form.value.cpf)) {
+    erroCpf.value = 'CPF inválido';
+    return false;
+  }
+  erroCpf.value = '';
+  return true;
 };
 
 const modalConfig = ref({
@@ -316,6 +352,10 @@ const removerEndereco = (index: number) => {
 
 const salvar = async () => {
   try {
+    if (!verificarCpf()) {
+     abrirModalAviso('Erro', 'Corrija o CPF antes de continuar.', true);
+     return;
+    }
     if (form.value.addresses.length === 0) {
       abrirModalAviso('Atenção', 'Adicione pelo menos um endereço!', true);
       return;
